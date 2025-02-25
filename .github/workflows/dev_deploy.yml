@@ -24,7 +24,7 @@ jobs:
       # 3️⃣ application.properties 생성 (GitHub Secrets 사용)
       - name: Create application.properties
         run: |
-          cat <<EOF > DriveMate/spring/src/main/resources/application.properties
+          cat <<EOF > drivemate/src/main/resources/application.properties
           spring.datasource.url=${{ secrets.RDS_URL }}
           spring.datasource.username=${{ secrets.RDS_USERNAME }}
           spring.datasource.password=${{ secrets.RDS_PASSWORD }}
@@ -36,20 +36,20 @@ jobs:
 
       # 4️⃣ Gradle 빌드
       - name: Grant execute permission for gradlew
-        run: chmod +x DriveMate/spring/gradlew
+        run: chmod +x drivemate/gradlew
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
-          build-root-directory: DriveMate/spring
+          build-root-directory: drivemate
 
       # 5️⃣ 빌드된 JAR 파일 업로드 (GitHub Actions에서 사용할 수 있도록 저장)
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: Drivemate-Server
-          path: DriveMate/spring/build/libs/*.jar
+          path: drivemate/build/libs/*.jar
 
       # 6️⃣ 테스트 결과 업로드 (실패해도 계속 진행)
       - name: Upload Test Results
@@ -57,7 +57,7 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: DriveMate/spring/build/reports/tests/test/
+          path: drivemate/build/reports/tests/test/
 
   # 7️⃣ EC2 배포
   deploy:
