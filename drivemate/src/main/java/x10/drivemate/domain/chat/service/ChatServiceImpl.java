@@ -102,8 +102,8 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse> getChatList(Pageable pageable, Integer year) {
-        Page<ChatLog> chatPage = chatLogRepository.findByYear(year, pageable);
+    public ResponseEntity<ApiResponse> getChatList(Pageable pageable, Integer year, Long memberId) {
+        Page<ChatLog> chatPage = chatLogRepository.findByYearAndMember(year, memberId, pageable);
 
         PageInfo pageInfo = new PageInfo(chatPage.getNumber(), chatPage.getSize(),
                 chatPage.hasNext(), chatPage.getTotalElements(), chatPage.getTotalPages());

@@ -13,5 +13,5 @@ public interface ChatService {
     void saveChatSummary(ChatRequestDto.ChatSummaryDto request);
     ChatResponseDto.ChatResultDto getChat(Long chatId);
     void deleteChat(Long chatId);
-    ResponseEntity<ApiResponse> getChatList(Pageable pageable, Integer year);
+    ResponseEntity<ApiResponse> getChatList(Pageable pageable, Integer year, Long memberId);
 }

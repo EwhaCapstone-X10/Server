@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChatLogRepository extends JpaRepository<ChatLog, Long> {
 
-    @Query("SELECT c FROM ChatLog c WHERE FUNCTION('YEAR', c.date) = :year")
-    Page<ChatLog> findByYear(@Param("year") int year, Pageable pageable);
+    @Query("SELECT c FROM ChatLog c JOIN c.member m WHERE FUNCTION('YEAR', c.date) = :year AND m.memberId = :memberId")
+    Page<ChatLog> findByYearAndMember(@Param("year") int year, @Param("memberId") Long memberId, Pageable pageable);
 }
