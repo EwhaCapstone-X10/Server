@@ -52,6 +52,10 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Mode mode;
 
+    @Column(name = "login_status")
+    @Enumerated(EnumType.STRING)
+    private LoginStatus loginStatus;
+
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
