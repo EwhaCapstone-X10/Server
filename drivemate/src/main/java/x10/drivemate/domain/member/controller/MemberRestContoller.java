@@ -26,6 +26,9 @@ public class MemberRestContoller {
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 
+    // 카카오 소셜 로그인
+
+
     // 개인정보 업데이트
     @PostMapping("")
     public ResponseEntity<ApiResponse> userInfo(
