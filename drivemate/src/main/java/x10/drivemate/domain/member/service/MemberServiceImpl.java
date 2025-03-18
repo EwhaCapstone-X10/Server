@@ -35,8 +35,8 @@ public class MemberServiceImpl implements MemberService {
 
         Member member = Member.builder()
                 .email(request.getEmail())
-                .password(request.getPassword())
-                .isDeleted(false)
+                //.password(request.getPassword())
+                //.isDeleted(false)
                 .build();
 
         memberRepository.save(member);

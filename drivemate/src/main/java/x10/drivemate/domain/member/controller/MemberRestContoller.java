@@ -4,6 +4,7 @@ import x10.drivemate.common.response.ApiResponse;
 import x10.drivemate.common.status.SuccessStatus;
 import x10.drivemate.domain.member.dto.MemberRequestDto;
 import x10.drivemate.domain.member.dto.MemberResponseDto;
+import x10.drivemate.domain.member.service.KakaoService;
 import x10.drivemate.domain.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberRestContoller {
 
     private final MemberService memberService;
+    private final KakaoService kakaoService;
 
     // 기본 회원가입
     @PostMapping("/signup")
@@ -27,7 +29,13 @@ public class MemberRestContoller {
     }
 
     // 카카오 소셜 로그인
-
+    @PostMapping("/oauth/kakao")
+    public ResponseEntity<ApiResponse> oauthKakao(
+            @RequestParam("accessToken") String accessToken
+    ) {
+        String jwtToken = kakaoService.getUserInfo(accessToken);
+        return ApiResponse.onSuccess(SuccessStatus._OK, jwtToken);
+    }
 
     // 개인정보 업데이트
     @PostMapping("")
