@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 import io.jsonwebtoken.*;
@@ -24,9 +25,18 @@ public class JwtTokenProvider {
     @Value("${jwt.secretKey}")
     private String secretKey;
 
+    private Key signingKey;  // 사용할 Key를 안전한 비밀 키로 설정할 변수
+
     @PostConstruct
     protected void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
+        // 기존 비밀 키가 Base64로 인코딩된 문자열일 경우, 이를 복호화하여 Key를 생성합니다.
+        if (secretKey != null && !secretKey.isEmpty()) {
+            byte[] decodedKey = Base64.getDecoder().decode(secretKey);
+            signingKey = Keys.hmacShaKeyFor(decodedKey);  // Base64 복호화한 비밀 키로 키 객체 생성
+        } else {
+            // 비밀 키가 없거나 잘못된 경우, 안전한 256비트 키 생성
+            signingKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);  // HS256 알고리즘에 맞는 안전한 키 생성
+        }
     }
 
     public String createToken(String kakaoId) {

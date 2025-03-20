@@ -1,6 +1,7 @@
 package x10.drivemate.domain.member.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import x10.drivemate.common.response.ApiResponse;
 import x10.drivemate.common.status.SuccessStatus;
 import x10.drivemate.domain.member.dto.MemberRequestDto;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import x10.drivemate.global.security.CustomUserPrincipal;
 
 import java.util.Map;
 
@@ -42,7 +44,6 @@ public class MemberRestContoller {
         String accessToken = authorization.replace("Bearer ", "");
 
         String kakaoId = kakaoService.getKakaoIdFromAccessToken(accessToken);
-
         return memberService.handleLogin(kakaoId);
     }
 
@@ -58,9 +59,9 @@ public class MemberRestContoller {
     // 개인정보 조회
     @GetMapping("/info")
     public ResponseEntity<ApiResponse> getUserinfo(
-            @PathVariable Long memberId
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ) {
-        MemberResponseDto.userInfodto response = memberService.getUserInfo(memberId);
+        MemberResponseDto.userInfodto response = memberService.getUserInfo(userPrincipal.getMemberId());
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 }

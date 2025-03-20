@@ -32,7 +32,7 @@ public class Member {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
     //@Column(name = "password", nullable = false)
