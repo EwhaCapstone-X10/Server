@@ -42,8 +42,9 @@ public class MemberRestContoller {
     ) {
         // Authorization 헤더에서 토큰을 추출하여 kakaoId 얻음
         String accessToken = authorization.replace("Bearer ", "");
-
         String kakaoId = kakaoService.getKakaoIdFromAccessToken(accessToken);
+
+        // 앱 내 엑세스 토큰 생성 (JWT)
         return memberService.handleLogin(kakaoId);
     }
 
