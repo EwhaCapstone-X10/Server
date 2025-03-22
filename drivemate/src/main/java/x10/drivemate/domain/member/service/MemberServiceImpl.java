@@ -52,6 +52,7 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.save(member);
     }
 
+    /*
     @Override
     @Transactional
     public MemberResponseDto.signupResultdto signupMember(MemberRequestDto.@Valid signupDto request) {
@@ -72,6 +73,8 @@ public class MemberServiceImpl implements MemberService {
                 .signupTime(member.getCreatedAt())
                 .build();
     }
+
+     */
 
     @Transactional
     @Override
@@ -143,6 +146,7 @@ public class MemberServiceImpl implements MemberService {
                 .mode(member.getMode())
                 .occupation(member.getOccupation())
                 .interests(keywordnames)
+                .loginStatus(member.getLoginStatus())
                 .build();
     }
 
