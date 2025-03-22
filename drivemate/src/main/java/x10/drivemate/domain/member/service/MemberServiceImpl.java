@@ -31,12 +31,15 @@ public class MemberServiceImpl implements MemberService {
     private final MemberKeywordRepository memberKeywordRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public ResponseEntity<ApiResponse> handleLogin(String kakaoId) {
+    public MemberResponseDto.kakaoLoginResultdto handleLogin(String kakaoId) {
         Member member = memberRepository.findByKakaoId(kakaoId).orElseGet(() -> createNewMember(kakaoId));
 
         String jwtToken = jwtTokenProvider.createToken(member.getKakaoId());
-
-        return (ApiResponse.onSuccess(SuccessStatus._OK, jwtToken));
+        return MemberResponseDto.kakaoLoginResultdto.builder()
+                .memberId(member.getMemberId())
+                .kakaoId(member.getKakaoId())
+                .jwtToken(jwtToken)
+                .build();
     }
 
     private Member createNewMember(String kakaoId) {

@@ -26,6 +26,16 @@ public class MemberResponseDto {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class kakaoLoginResultdto {
+        private Long memberId;
+        private String kakaoId;
+        private String jwtToken;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class userInfodto {
         private Long memberId;
         private String name;

@@ -10,5 +10,5 @@ public interface MemberService {
     MemberResponseDto.signupResultdto signupMember(MemberRequestDto.signupDto request);
     MemberResponseDto.userInfodto userInfo(MemberRequestDto.userInfoDto request);
     MemberResponseDto.userInfodto getUserInfo(Long memberId);
-    ResponseEntity<ApiResponse> handleLogin(String kakaoId);
+    MemberResponseDto.kakaoLoginResultdto handleLogin(String kakaoId);
 }

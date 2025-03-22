@@ -1,9 +1,9 @@
 package x10.drivemate.domain.member.service;
 
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +12,8 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 
+import javax.crypto.spec.SecretKeySpec;
 
 @Slf4j
 @Component
@@ -29,15 +29,14 @@ public class JwtTokenProvider {
 
     @PostConstruct
     protected void init() {
-        // 기존 비밀 키가 Base64로 인코딩된 문자열일 경우, 이를 복호화하여 Key를 생성합니다.
         if (secretKey != null && !secretKey.isEmpty()) {
-            byte[] decodedKey = Base64.getDecoder().decode(secretKey);
-            signingKey = Keys.hmacShaKeyFor(decodedKey);  // Base64 복호화한 비밀 키로 키 객체 생성
+            byte[] decodedKey = Base64.getDecoder().decode(secretKey);  // Base64로 디코딩된 비밀 키
+            signingKey = new SecretKeySpec(decodedKey, "HmacSHA256");  // 서명 키 생성
         } else {
-            // 비밀 키가 없거나 잘못된 경우, 안전한 256비트 키 생성
-            signingKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);  // HS256 알고리즘에 맞는 안전한 키 생성
+            signingKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);  // 기본 서명 키 사용
         }
     }
+
 
     public String createToken(String kakaoId) {
         return createToken(kakaoId, ACCESS_TOKEN_VALIDITY);
@@ -49,32 +48,36 @@ public class JwtTokenProvider {
 
     private String createToken(String kakaoId, long validity) {
         Date now = new Date();
-        return Jwts.builder()
+
+        // JWT 토큰 생성
+        String token = Jwts.builder()
                 .setSubject(kakaoId)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + validity))
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
+                .signWith(signingKey, SignatureAlgorithm.HS256)  // HS256 알고리즘으로 서명
                 .compact();
+
+        log.info("Generated JWT Token: {}", token);  // 생성된 토큰 로깅
+        return token;
     }
 
     // JWT 토큰에서 사용자 ID(kakaoId) 추출
     public String getUserPk(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser()
+                .setSigningKey(signingKey)  // signingKey 사용
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
-    // 유효성 검사
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parser()
+                    .setSigningKey(signingKey)
+                    .parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
-        } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
+        } catch (JwtException | IllegalArgumentException e) {
+            log.error("Invalid or expired token: {}", token, e);
         }
         return false;
     }
@@ -87,4 +90,5 @@ public class JwtTokenProvider {
         }
         return null;  // 유효하지 않은 refresh토큰에 대해서는 null 반환
     }
+
 }

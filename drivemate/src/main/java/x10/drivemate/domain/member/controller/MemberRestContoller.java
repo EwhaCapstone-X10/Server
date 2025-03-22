@@ -44,8 +44,9 @@ public class MemberRestContoller {
         String accessToken = authorization.replace("Bearer ", "");
         String kakaoId = kakaoService.getKakaoIdFromAccessToken(accessToken);
 
+        MemberResponseDto.kakaoLoginResultdto response = memberService.handleLogin(kakaoId);
         // 앱 내 엑세스 토큰 생성 (JWT)
-        return memberService.handleLogin(kakaoId);
+        return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 
     // 개인정보 업데이트
