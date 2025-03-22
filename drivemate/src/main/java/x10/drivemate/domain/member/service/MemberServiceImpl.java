@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import x10.drivemate.global.security.CustomUserPrincipal;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,9 +75,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public MemberResponseDto.userInfodto userInfo(MemberRequestDto.userInfoDto request) {
+    public MemberResponseDto.userInfodto userInfo(CustomUserPrincipal userPrincipal, MemberRequestDto.userInfoDto request) {
 
-        Member member = memberRepository.findById(request.getMemberId())
+        Member member = memberRepository.findById(userPrincipal.getMemberId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         member.setName(request.getName());
@@ -84,6 +85,7 @@ public class MemberServiceImpl implements MemberService {
         member.setSex(request.getSex());
         member.setMode(request.getMode());
         member.setOccupation(request.getOccupation());
+        member.setLoginStatus(LoginStatus.finished);
 
         if (request.getInterests() != null) {
             memberKeywordRepository.deleteAllByMember(member);
@@ -119,6 +121,7 @@ public class MemberServiceImpl implements MemberService {
                 .mode(member.getMode())
                 .occupation(member.getOccupation())
                 .interests(keywordnames)
+                .loginStatus(member.getLoginStatus())
                 .build();
 
     }

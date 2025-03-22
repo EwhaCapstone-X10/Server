@@ -49,12 +49,13 @@ public class MemberRestContoller {
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 
-    // 개인정보 업데이트
+    // 개인정보 저장, 업데이트
     @PostMapping("")
     public ResponseEntity<ApiResponse> userInfo(
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal,
             @RequestBody @Valid MemberRequestDto.userInfoDto request
     ) {
-        MemberResponseDto.userInfodto response = memberService.userInfo(request);
+        MemberResponseDto.userInfodto response = memberService.userInfo(userPrincipal, request);
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 
