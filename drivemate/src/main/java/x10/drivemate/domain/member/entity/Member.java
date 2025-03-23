@@ -32,11 +32,11 @@ public class Member {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+    //@Column(name = "password", nullable = false)
+    //private String password;
 
     @Column(name = "sex")
     @Enumerated(EnumType.STRING)
@@ -52,8 +52,18 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Mode mode;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted;
+    @Column(name = "login_status")
+    @Enumerated(EnumType.STRING)
+    private LoginStatus loginStatus;
+
+    @Column(nullable = false, unique = true)
+    private String kakaoId;  // 카카오 고유 ID
+
+    @Column(nullable = false)
+    private String nickname;
+
+    @Column
+    private String profileImageUrl;
 
     @CreatedDate  // 생성 시간 자동 설정
     @Column(name = "createdAt", nullable = false)

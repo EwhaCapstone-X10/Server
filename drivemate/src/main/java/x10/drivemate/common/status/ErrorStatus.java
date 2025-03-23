@@ -25,7 +25,13 @@ public enum ErrorStatus {
 
     CHAT_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHAT4001", "해당 ID의 대화내역이 없습니다."),
 
-    CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CATEGORY4001", "해당 카테고리가 없습니다.");
+    CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CATEGORY4001", "해당 카테고리가 없습니다."),
+
+    // 소셜로그인
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "LOGIN4001", "만료된 토큰입니다."),
+    KAKAO_API_ERROR(HttpStatus.UNAUTHORIZED, "LOGIN4002", "카카오 API 에러입니다."),
+
+    GENERAL_ERROR(HttpStatus.BAD_REQUEST, "GENERAL4001", "일반 오류");
 
     private final HttpStatus status;
     private final String code;

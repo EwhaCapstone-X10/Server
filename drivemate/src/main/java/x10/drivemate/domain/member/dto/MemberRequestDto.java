@@ -30,7 +30,6 @@ public class MemberRequestDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class userInfoDto {
-        private Long memberId;
         private String name;
         private LocalDate birthdate;
         private MemberSex sex;

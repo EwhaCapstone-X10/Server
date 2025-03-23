@@ -1,5 +1,6 @@
 package x10.drivemate.domain.member.dto;
 
+import x10.drivemate.domain.member.entity.LoginStatus;
 import x10.drivemate.domain.member.entity.MemberSex;
 import x10.drivemate.domain.member.entity.Mode;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,16 @@ public class MemberResponseDto {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class kakaoLoginResultdto {
+        private Long memberId;
+        private String kakaoId;
+        private String jwtToken;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class userInfodto {
         private Long memberId;
         private String name;
@@ -34,5 +45,6 @@ public class MemberResponseDto {
         private Mode mode;
         private String occupation;
         private List<String> interests;
+        private LoginStatus loginStatus;
     }
 }
