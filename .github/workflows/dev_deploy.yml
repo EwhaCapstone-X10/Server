@@ -78,6 +78,12 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
+          RDS_URL: ${{ secrets.RDS_URL }}
+          RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+          OAUTH_REST: ${{ secrets.OAUTH_REST }}
+          OAUTH_CLIENT: ${{ secrets.OAUTH_CLIENT }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
         run: |
           echo "$EC2_SSH_KEY" > drivemate.pem
           chmod 600 drivemate.pem
