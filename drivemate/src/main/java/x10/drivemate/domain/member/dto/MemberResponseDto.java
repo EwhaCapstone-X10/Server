@@ -31,6 +31,7 @@ public class MemberResponseDto {
         private Long memberId;
         private String kakaoId;
         private String jwtToken;
+        private LoginStatus loginStatus;
     }
 
     @Getter
