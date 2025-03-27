@@ -24,7 +24,7 @@ public enum ErrorStatus {
     EMAIL_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용중인 이메일입니다."),
 
     CHAT_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHAT4001", "해당 ID의 대화내역이 없습니다."),
-    CHAT_FORBIDDEN(HttpStatus.BAD_REQUEST, "CHAT4002", "해당 chat을 조회할 권한이 없습니다."),
+    CHAT_FORBIDDEN(HttpStatus.BAD_REQUEST, "CHAT4002", "해당 chat에 권한이 없습니다."),
 
     CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CATEGORY4001", "해당 카테고리가 없습니다."),
 

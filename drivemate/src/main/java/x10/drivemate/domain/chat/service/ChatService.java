@@ -13,6 +13,6 @@ public interface ChatService {
     ChatResponseDto.ChatLogResultDto saveChatLog(ChatRequestDto.ChatLogDto request);
     void saveChatSummary(ChatRequestDto.ChatSummaryDto request);
     ChatResponseDto.ChatResultDto getChat(Long chatId, CustomUserPrincipal userPrincipal);
-    void deleteChat(Long chatId);
+    void deleteChat(Long chatId, CustomUserPrincipal userPrincipal);
     ResponseEntity<ApiResponse> getChatList(Pageable pageable, Integer year, Long memberId);
 }

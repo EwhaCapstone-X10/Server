@@ -49,9 +49,10 @@ public class ChatRestController {
 
     @DeleteMapping("/{chatId}")
     public ResponseEntity<ApiResponse> deleteChat(
-            @PathVariable Long chatId
+            @PathVariable Long chatId,
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ) {
-        chatService.deleteChat(chatId);
+        chatService.deleteChat(chatId, userPrincipal);
         return ApiResponse.onSuccess(SuccessStatus._DELETED);
     }
 

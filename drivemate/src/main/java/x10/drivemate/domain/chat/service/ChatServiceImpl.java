@@ -101,10 +101,17 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void deleteChat(Long chatId) {
-        // 권한 확인
+    public void deleteChat(Long chatId, CustomUserPrincipal userPrincipal) {
+
+        Member member = memberRepository.findById(userPrincipal.getMemberId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
         ChatLog chatLog = chatLogRepository.findById(chatId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHAT_NOT_FOUND));
+
+        if (!member.equals(chatLog.getMember())) {
+            throw new GeneralException(ErrorStatus.CHAT_FORBIDDEN);
+        }
 
         chatLogRepository.delete(chatLog);
     }
