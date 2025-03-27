@@ -19,6 +19,7 @@ import x10.drivemate.domain.chat.entity.ChatLog;
 import x10.drivemate.domain.chat.entity.ChatMessage;
 import x10.drivemate.domain.chat.repository.ChatLogRepository;
 import x10.drivemate.domain.chat.repository.ChatMessageRepository;
+import x10.drivemate.global.security.CustomUserPrincipal;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,11 +73,18 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatResponseDto.ChatResultDto getChat(Long chatId) {
-        // 추후에 권한 확인 로직 추가
+    public ChatResponseDto.ChatResultDto getChat(Long chatId, CustomUserPrincipal userPrincipal) {
+
+        Member member = memberRepository.findById(userPrincipal.getMemberId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         ChatLog chatLog = chatLogRepository.findById(chatId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHAT_NOT_FOUND));
+
+        // 조회 권한 확인
+        if (!member.equals(chatLog.getMember())) {
+            throw new GeneralException(ErrorStatus.CHAT_FORBIDDEN);
+        }
 
         List<ChatMessage> messages = chatLog.getChatting();
         List<ChatRequestDto.ChatMessageDto> chatMessageDtos = messages.stream()
