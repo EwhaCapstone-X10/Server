@@ -56,14 +56,14 @@ public class ChatRestController {
         return ApiResponse.onSuccess(SuccessStatus._DELETED);
     }
 
-    @GetMapping("/list/{memberId}")
+    @GetMapping("/list")
     public ResponseEntity<ApiResponse> getChats(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam int year,
-            @PathVariable Long memberId
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
-        return chatService.getChatList(pageable, year, memberId);
+        return chatService.getChatList(pageable, year, userPrincipal);
     }
 }
