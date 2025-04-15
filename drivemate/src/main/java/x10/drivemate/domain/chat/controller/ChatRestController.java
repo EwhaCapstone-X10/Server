@@ -1,5 +1,6 @@
 package x10.drivemate.domain.chat.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import x10.drivemate.common.response.ApiResponse;
 import x10.drivemate.common.status.SuccessStatus;
 import x10.drivemate.domain.chat.dto.ChatRequestDto;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import x10.drivemate.global.security.CustomUserPrincipal;
 
 import java.util.List;
 
@@ -38,28 +40,30 @@ public class ChatRestController {
 
     @GetMapping("/{chatId}")
     public ResponseEntity<ApiResponse> getChatinfo(
-            @PathVariable Long chatId
-    ) {
-        ChatResponseDto.ChatResultDto response = chatService.getChat(chatId);
+            @PathVariable Long chatId,
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
+            ) {
+        ChatResponseDto.ChatResultDto response = chatService.getChat(chatId, userPrincipal);
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 
     @DeleteMapping("/{chatId}")
     public ResponseEntity<ApiResponse> deleteChat(
-            @PathVariable Long chatId
+            @PathVariable Long chatId,
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ) {
-        chatService.deleteChat(chatId);
+        chatService.deleteChat(chatId, userPrincipal);
         return ApiResponse.onSuccess(SuccessStatus._DELETED);
     }
 
-    @GetMapping("/list/{memberId}")
+    @GetMapping("/list")
     public ResponseEntity<ApiResponse> getChats(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam int year,
-            @PathVariable Long memberId
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
-        return chatService.getChatList(pageable, year, memberId);
+        return chatService.getChatList(pageable, year, userPrincipal);
     }
 }

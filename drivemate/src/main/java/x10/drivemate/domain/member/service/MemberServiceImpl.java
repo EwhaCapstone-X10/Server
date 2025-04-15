@@ -40,6 +40,7 @@ public class MemberServiceImpl implements MemberService {
                 .memberId(member.getMemberId())
                 .kakaoId(member.getKakaoId())
                 .jwtToken(jwtToken)
+                .loginStatus(member.getLoginStatus())
                 .build();
     }
 

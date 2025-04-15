@@ -19,6 +19,7 @@ import x10.drivemate.domain.chat.entity.ChatLog;
 import x10.drivemate.domain.chat.entity.ChatMessage;
 import x10.drivemate.domain.chat.repository.ChatLogRepository;
 import x10.drivemate.domain.chat.repository.ChatMessageRepository;
+import x10.drivemate.global.security.CustomUserPrincipal;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,11 +73,18 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatResponseDto.ChatResultDto getChat(Long chatId) {
-        // 추후에 권한 확인 로직 추가
+    public ChatResponseDto.ChatResultDto getChat(Long chatId, CustomUserPrincipal userPrincipal) {
+
+        Member member = memberRepository.findById(userPrincipal.getMemberId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         ChatLog chatLog = chatLogRepository.findById(chatId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHAT_NOT_FOUND));
+
+        // 조회 권한 확인
+        if (!member.equals(chatLog.getMember())) {
+            throw new GeneralException(ErrorStatus.CHAT_FORBIDDEN);
+        }
 
         List<ChatMessage> messages = chatLog.getChatting();
         List<ChatRequestDto.ChatMessageDto> chatMessageDtos = messages.stream()
@@ -93,17 +101,24 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void deleteChat(Long chatId) {
-        // 권한 확인
+    public void deleteChat(Long chatId, CustomUserPrincipal userPrincipal) {
+
+        Member member = memberRepository.findById(userPrincipal.getMemberId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
         ChatLog chatLog = chatLogRepository.findById(chatId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CHAT_NOT_FOUND));
+
+        if (!member.equals(chatLog.getMember())) {
+            throw new GeneralException(ErrorStatus.CHAT_FORBIDDEN);
+        }
 
         chatLogRepository.delete(chatLog);
     }
 
     @Override
-    public ResponseEntity<ApiResponse> getChatList(Pageable pageable, Integer year, Long memberId) {
-        Page<ChatLog> chatPage = chatLogRepository.findByYearAndMember(year, memberId, pageable);
+    public ResponseEntity<ApiResponse> getChatList(Pageable pageable, Integer year, CustomUserPrincipal userPrincipal) {
+        Page<ChatLog> chatPage = chatLogRepository.findByYearAndMember(year, userPrincipal.getMemberId(), pageable);
 
         PageInfo pageInfo = new PageInfo(chatPage.getNumber(), chatPage.getSize(),
                 chatPage.hasNext(), chatPage.getTotalElements(), chatPage.getTotalPages());
