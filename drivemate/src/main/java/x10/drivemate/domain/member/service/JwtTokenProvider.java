@@ -19,8 +19,8 @@ import javax.crypto.spec.SecretKeySpec;
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
-    private final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 60; // 1시간
-    private final long REFRESH_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 7; // 7일
+    private final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 7; // 7일
+    private final long REFRESH_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 30; // 1달
 
     @Value("${jwt.secretKey}")
     private String secretKey;

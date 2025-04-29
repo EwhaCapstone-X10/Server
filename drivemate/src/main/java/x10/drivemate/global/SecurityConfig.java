@@ -30,7 +30,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())// CSRF protection disabled for stateless applications
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/members/oauth/kakao", "/stretching","/api/member/login", "/api/member/signup").permitAll()
+                        .requestMatchers("/members/oauth/kakao", "/stretching","/api/member/login", "/api/member/signup", "members/testToken").permitAll()
                     .anyRequest().authenticated()) // Require authentication for all other requests
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);  // Add JWT filter before the default authentication filter
         return http.build();
