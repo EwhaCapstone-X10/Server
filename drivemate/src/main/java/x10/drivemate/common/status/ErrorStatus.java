@@ -25,6 +25,7 @@ public enum ErrorStatus {
 
     CHAT_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHAT4001", "해당 ID의 대화내역이 없습니다."),
     CHAT_FORBIDDEN(HttpStatus.BAD_REQUEST, "CHAT4002", "해당 chat에 권한이 없습니다."),
+    CHATGPT_PARSING_ERROR(HttpStatus.BAD_REQUEST, "CHAT4003",  "AI 응답 파싱 과정에서 오류가 생겼습니다."),
 
     CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CATEGORY4001", "해당 카테고리가 없습니다."),
 
