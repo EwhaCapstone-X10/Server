@@ -33,8 +33,8 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public ChatResponseDto.ChatLogResultDto saveChatLog(ChatRequestDto.ChatLogDto request) {
-        Member member = memberRepository.findById(request.getMemberId())
+    public ChatResponseDto.ChatLogResultDto saveChatLog(ChatRequestDto.ChatLogDto request, CustomUserPrincipal userPrincipal) {
+        Member member = memberRepository.findById(userPrincipal.getMemberId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         ChatLog chatLog = ChatLog.builder()

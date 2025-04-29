@@ -24,12 +24,14 @@ public class ChatRestController {
 
     @PostMapping("")
     public ResponseEntity<ApiResponse> saveChat(
-            @RequestBody ChatRequestDto.ChatLogDto request)
+            @RequestBody ChatRequestDto.ChatLogDto request,
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal)
     {
-        ChatResponseDto.ChatLogResultDto response = chatService.saveChatLog(request);
+        ChatResponseDto.ChatLogResultDto response = chatService.saveChatLog(request, userPrincipal);
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
     }
 
+    /*
     @PostMapping("/summary")
     public ResponseEntity<ApiResponse> saveChatSummary(
             @RequestBody ChatRequestDto.ChatSummaryDto request)
@@ -37,6 +39,7 @@ public class ChatRestController {
         chatService.saveChatSummary(request);
         return ApiResponse.onSuccess(SuccessStatus._OK);
     }
+     */
 
     @GetMapping("/{chatId}")
     public ResponseEntity<ApiResponse> getChatinfo(
