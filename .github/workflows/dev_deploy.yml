@@ -111,6 +111,8 @@ jobs:
           OAUTH_REST: ${{ secrets.OAUTH_REST }}
           OAUTH_CLIENT: ${{ secrets.OAUTH_CLIENT }}
           JWT_KEY: ${{ secrets.JWT_KEY }}
+          openai.api.key: ${{ secrets.AI_KEY }}
+          
         run: |
           echo "$EC2_SSH_KEY" > x10.pem
           chmod 600 x10.pem
@@ -126,7 +128,7 @@ jobs:
           scp -i x10.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/Drivemate-Server.jar
 
           # EC2에서 실행 중인 서버 종료 및 새 JAR 실행
-          ssh -i drivemate.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
+          ssh -i x10.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
             echo "🔄 기존 프로세스 종료 중..."
             pkill -f 'java -jar' || echo "No process to kill"
 
@@ -136,4 +138,4 @@ jobs:
           EOF
 
           # SSH 키 삭제
-          rm -f drivemate.pem
+          rm -f x10.pem
