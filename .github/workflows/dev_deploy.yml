@@ -112,18 +112,18 @@ jobs:
           OAUTH_CLIENT: ${{ secrets.OAUTH_CLIENT }}
           JWT_KEY: ${{ secrets.JWT_KEY }}
         run: |
-          echo "$EC2_SSH_KEY" > drivemate.pem
-          chmod 600 drivemate.pem
+          echo "$EC2_SSH_KEY" > x10.pem
+          chmod 600 x10.pem
 
           # SSH 접속 테스트
-          ssh -i drivemate.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "echo '✅ Connected successfully'"
+          ssh -i x10.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "echo '✅ Connected successfully'"
 
           # JAR 파일 찾기
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
           echo "JAR 파일 경로: $jar_file"
 
           # EC2에 JAR 파일 전송
-          scp -i drivemate.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/Drivemate-Server.jar
+          scp -i x10.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/Drivemate-Server.jar
 
           # EC2에서 실행 중인 서버 종료 및 새 JAR 실행
           ssh -i drivemate.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
