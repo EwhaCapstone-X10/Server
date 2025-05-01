@@ -1,6 +1,7 @@
 package x10.drivemate.domain.chat.service;
 
 import x10.drivemate.common.exception.GeneralException;
+import x10.drivemate.domain.chat.dto.GptResponseDto;
 import x10.drivemate.domain.member.entity.Member;
 import x10.drivemate.domain.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -30,11 +31,12 @@ public class ChatServiceImpl implements ChatService {
     private final MemberRepository memberRepository;
     private final ChatLogRepository chatLogRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatGptService chatGptService;
 
     @Override
     @Transactional
-    public ChatResponseDto.ChatLogResultDto saveChatLog(ChatRequestDto.ChatLogDto request) {
-        Member member = memberRepository.findById(request.getMemberId())
+    public ChatResponseDto.ChatLogResultDto saveChatLog(ChatRequestDto.ChatLogDto request, CustomUserPrincipal userPrincipal) {
+        Member member = memberRepository.findById(userPrincipal.getMemberId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         ChatLog chatLog = ChatLog.builder()
@@ -53,12 +55,25 @@ public class ChatServiceImpl implements ChatService {
                 .collect(Collectors.toList());
         chatMessageRepository.saveAll(messages);
 
+        // gpt 호출하여 요약 및 키워드 추출
+        String conversation = messages.stream()
+                .map(ChatMessage::getChat)
+                .collect(Collectors.joining("\n"));  // 대화 내용 합치기
+
+        GptResponseDto.GptSummaryKeywordDto gptResponse = chatGptService.generateSummaryAndKeywords(conversation);
+
+        savedChatLog.setKeywords(gptResponse.getKeywords());
+        savedChatLog.setSummary(gptResponse.getSummary());
+        chatLogRepository.save(savedChatLog);
+
         List<ChatRequestDto.ChatMessageDto> chatMessageDtos = messages.stream()
                 .map(msg -> new ChatRequestDto.ChatMessageDto(msg.getRole(), msg.getChat(), msg.getIdx()))
                 .collect(Collectors.toList());
 
         return ChatResponseDto.ChatLogResultDto.builder()
                 .chatId(chatLog.getChatLogId())
+                .summary(gptResponse.getSummary())
+                .keywords(gptResponse.getKeywords())
                 .build();
     }
 

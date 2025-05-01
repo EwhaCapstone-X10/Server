@@ -24,6 +24,8 @@ public class ChatResponseDto {
     @AllArgsConstructor
     public static class ChatLogResultDto {
         private Long chatId;
+        private String summary;
+        private String keywords;
     }
 
     @Getter

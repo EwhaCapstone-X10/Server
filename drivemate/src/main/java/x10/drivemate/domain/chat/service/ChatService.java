@@ -10,7 +10,7 @@ import x10.drivemate.global.security.CustomUserPrincipal;
 import java.util.List;
 
 public interface ChatService {
-    ChatResponseDto.ChatLogResultDto saveChatLog(ChatRequestDto.ChatLogDto request);
+    ChatResponseDto.ChatLogResultDto saveChatLog(ChatRequestDto.ChatLogDto request, CustomUserPrincipal userPrincipal);
     void saveChatSummary(ChatRequestDto.ChatSummaryDto request);
     ChatResponseDto.ChatResultDto getChat(Long chatId, CustomUserPrincipal userPrincipal);
     void deleteChat(Long chatId, CustomUserPrincipal userPrincipal);

@@ -6,6 +6,7 @@ import x10.drivemate.common.response.ApiResponse;
 import x10.drivemate.common.status.SuccessStatus;
 import x10.drivemate.domain.member.dto.MemberRequestDto;
 import x10.drivemate.domain.member.dto.MemberResponseDto;
+import x10.drivemate.domain.member.service.JwtTokenProvider;
 import x10.drivemate.domain.member.service.KakaoService;
 import x10.drivemate.domain.member.service.MemberService;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ public class MemberRestContoller {
 
     private final MemberService memberService;
     private final KakaoService kakaoService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /*
     // 기본 회원가입
@@ -66,5 +68,12 @@ public class MemberRestContoller {
     ) {
         MemberResponseDto.userInfodto response = memberService.getUserInfo(userPrincipal.getMemberId());
         return ApiResponse.onSuccess(SuccessStatus._OK, response);
+    }
+
+    // 테스트 토큰 발급
+    @GetMapping("/testToken")
+    public String generateAccessTokenForTest(@RequestParam String kakaoId) {
+        String accessToken = jwtTokenProvider.createToken(kakaoId);
+        return (accessToken);
     }
 }
