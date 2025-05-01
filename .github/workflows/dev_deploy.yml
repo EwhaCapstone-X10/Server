@@ -32,6 +32,10 @@ jobs:
           spring.datasource.username=${{ secrets.RDS_USERNAME }}
           spring.datasource.password=${{ secrets.RDS_PASSWORD }}
           spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+          # OpenAI API key
+          openai.api.key= ${AI_KEY}
+          openai.api.url= https://api.openai.com/v1/chat/completions
       
           # JPA
           spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
