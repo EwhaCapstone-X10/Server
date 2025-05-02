@@ -34,7 +34,7 @@ jobs:
           spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
           # OpenAI API key
-          openai.api.key= ${AI_KEY}
+          openai.api.key= ${{ secrets.AI_KEY }}
           openai.api.url= https://api.openai.com/v1/chat/completions
       
           # JPA
