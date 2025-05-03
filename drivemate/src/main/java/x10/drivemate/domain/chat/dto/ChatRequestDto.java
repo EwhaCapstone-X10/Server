@@ -36,7 +36,6 @@ public class ChatRequestDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ChatLogDto {
-        private Long memberId;
         private LocalDateTime date;
 
         @Valid // 리스트 내부의 요소까지 검증하도
