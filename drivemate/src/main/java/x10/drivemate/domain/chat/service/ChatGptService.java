@@ -31,12 +31,16 @@ public class ChatGptService {
 
     public GptResponseDto.GptSummaryKeywordDto generateSummaryAndKeywords(String chatLog) {
         String prompt =
-                "Please summarize the following conversation in one sentence and extract key keywords. Provide the summary and keywords **in Korean**. The summary must be only one sentence.\n" +
+                "다음 대화를 한 문장으로 요약하고, 핵심 키워드를 추출하세요. " +
+                        "이건 챗봇 대화 서비스를 이용하는 고객에게 대화 내역과 함께 제공되는 요약과 키워드를 위함입니다."+
+                        "고객 본인에게 제공되는 것이므로 user 주어(고객, 상대방)는 생략해도 됩니다."+
+                        "요약은 20자 이내로, 문장은 반드시 '음'이나 '함' 과 같은 줄임 어미로 끝나야 합니다. " +
+                        "키워드는 **한국어로** 제공해주세요.\n" +
                 "\n" +
-                "Summary: {your summary}\n" +
-                "Keywords: {keyword1, keyword2, keyword3}\n" +
+                        "요약: {your summary}\n" +
+                        "키워드: {keyword1, keyword2, keyword3}\n" +
                 "\n" +
-                "Conversation:\n" +
+                "대화 내용:\n" +
                 chatLog;
 
         HttpHeaders headers = new HttpHeaders();
@@ -81,12 +85,12 @@ public class ChatGptService {
 
             String getResponse = contentNode.asText().trim();
 
-            String[] parts = getResponse.split("Keywords:", 2);
+            String[] parts = getResponse.split("키워드:", 2);
             String summary = parts[0].trim();
             String keywords = parts.length > 1 ? parts[1].trim() : "";
 
-            if (summary.startsWith("Summary:")) {
-                summary = summary.substring("Summary:".length()).trim();
+            if (summary.startsWith("요약:")) {
+                summary = summary.substring("요약:".length()).trim();
             }
 
             return GptResponseDto.GptSummaryKeywordDto.builder()
