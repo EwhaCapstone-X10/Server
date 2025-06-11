@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy to EC2 with Docker
 
 on:
   push:
@@ -10,75 +10,102 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
+      # 2️⃣ JDK 설정
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # 3️⃣ application.properties 생성
       - name: Create application.properties
         run: |
           cat <<EOF > drivemate/src/main/resources/application.properties
-          (기존과 동일)
+          spring.application.name=drivemate
+
+          spring.datasource.url=${{ secrets.RDS_URL }}
+          spring.datasource.username=${{ secrets.RDS_USERNAME }}
+          spring.datasource.password=${{ secrets.RDS_PASSWORD }}
+          spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+          openai.api.key=${{ secrets.AI_KEY }}
+          openai.api.url=https://api.openai.com/v1/chat/completions
+
+          spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
+          spring.jpa.hibernate.ddl-auto=update
+          spring.jpa.show-sql=true
+          spring.jpa.properties.hibernate.format_sql=true
+
+          spring.security.oauth2.client.registration.kakao.client-id=${{ secrets.OAUTH_REST }}
+          spring.security.oauth2.client.registration.kakao.client-secret=${{ secrets.OAUTH_CLIENT }}
+          spring.security.oauth2.client.registration.kakao.redirect-uri=http://localhost:8080/oauth/callback/kakao
+          spring.security.oauth2.client.registration.kakao.client-authentication-method=client_secret_post
+          spring.security.oauth2.client.registration.kakao.authorization-grant-type=authorization_code
+          spring.security.oauth2.client.registration.kakao.scope=profile_img, profile_nickname
+
+          spring.security.oauth2.client.provider.kakao.authorization-uri=https://kauth.kakao.com/oauth/authorize
+          spring.security.oauth2.client.provider.kakao.token-uri=https://kauth.kakao.com/oauth/token
+          spring.security.oauth2.client.provider.kakao.user-info-uri=https://kapi.kakao.com/v2/user/me
+          spring.security.oauth2.client.provider.kakao.user-name-attribute=id
+
+          jwt.secretKey=${{ secrets.JWT_KEY }}
           EOF
 
+      # 4️⃣ Gradle 빌드 (테스트 생략)
       - name: Grant execute permission for gradlew
         run: chmod +x drivemate/gradlew
 
-      - name: Build with Gradle
+      - name: Build with Gradle (skip tests)
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build -x test
           build-root-directory: drivemate
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Drivemate-Server
-          path: drivemate/build/libs/*.jar
+      # 5️⃣ 빌드된 JAR 확인 및 이동
+      - name: List build output
+        run: ls -l drivemate/build/libs/
 
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: drivemate/build/reports/tests/test/
+      - name: Move JAR to springboot directory
+        run: |
+          mkdir -p springboot
+          mv drivemate/build/libs/*.jar springboot/app.jar
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout code again
+        uses: actions/checkout@v3
         with:
-          name: Drivemate-Server
-          path: springboot
+          submodules: recursive
 
-      - name: Deploy to EC2 with Docker
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-
+      - name: Prepare SSH key
         run: |
-          echo "$EC2_SSH_KEY" > x10.pem
+          echo "${{ secrets.EC2_SSH_KEY }}" > x10.pem
           chmod 600 x10.pem
 
-          # jar => springboot/app.jar 로 이동
-          mv springboot/*.jar springboot/app.jar
+      - name: Deploy Dockerized App to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+        run: |
+          echo "📦 EC2에 코드 전송 중..."
+          scp -i x10.pem -o StrictHostKeyChecking=no -r . $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/Deploy
 
-          # EC2에 Dockerfile 포함 전체 프로젝트 전송
-          scp -i x10.pem -o StrictHostKeyChecking=no -r springboot $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/
-
-          # Docker build & up
+          echo "🚀 EC2에서 docker-compose up 실행 중..."
           ssh -i x10.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
             cd /home/$EC2_USERNAME/Deploy
-            docker-compose build spring
-            docker-compose up -d spring
+            docker-compose down
+            docker-compose build
+            docker-compose up -d
           EOF
 
-          rm -f x10.pem
+      - name: Cleanup SSH key
+        run: rm -f x10.pem
