@@ -74,7 +74,10 @@ jobs:
       - name: Move JAR to springboot directory
         run: |
           mkdir -p springboot
-          mv drivemate/build/libs/*.jar springboot/app.jar
+          JAR_PATH=$(find drivemate/build/libs -name "*.jar" ! -name "*plain.jar" | head -n 1)
+          echo "✅ Found JAR: $JAR_PATH"
+          cp "$JAR_PATH" springboot/app.jar
+
 
   deploy:
     needs: build
