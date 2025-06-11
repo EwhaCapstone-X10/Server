@@ -28,6 +28,7 @@ jobs:
         run: |
           cat <<EOF > drivemate/src/main/resources/application.properties
           spring.application.name=drivemate
+          server.address=0.0.0.0
 
           spring.datasource.url=${{ secrets.RDS_URL }}
           spring.datasource.username=${{ secrets.RDS_USERNAME }}
@@ -108,6 +109,10 @@ jobs:
             mkdir -p ~/Deploy
             unzip -o ~/code.zip -d ~/Deploy
             rm ~/code.zip
+
+            cd ~/Deploy
+            docker-compose down
+            docker-compose up --build -d
           EOF
 
       - name: Cleanup SSH key
