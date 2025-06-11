@@ -100,14 +100,14 @@ jobs:
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
         run: |
           echo "📦 EC2에 코드 전송 중..."
-          scp -i x10.pem -o StrictHostKeyChecking=no -r . $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/Deploy
+          zip -r code.zip . -x '*.git*'
+          scp -i x10.pem -o StrictHostKeyChecking=no code.zip $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/
 
           echo "🚀 EC2에서 docker-compose up 실행 중..."
           ssh -i x10.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
-            cd /home/$EC2_USERNAME/Deploy
-            docker-compose down
-            docker-compose build
-            docker-compose up -d
+            mkdir -p ~/Deploy
+            unzip -o ~/code.zip -d ~/Deploy
+            rm ~/code.zip
           EOF
 
       - name: Cleanup SSH key
