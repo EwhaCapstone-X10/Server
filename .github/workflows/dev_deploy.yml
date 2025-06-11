@@ -108,25 +108,31 @@ jobs:
           KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
           AI_KEY=${{ secrets.AI_KEY }}
           EOF
+          
+      - name: Show .env to confirm
+        run: cat .env
 
       - name: Deploy Dockerized App to EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
         run: |
-          echo "📦 EC2에 코드 전송 중..."
+          echo "📦 Zipping code..."
           zip -r code.zip springboot ai_model docker-compose.yml .env -x '*.git*'
+
+          echo "📦 Sending to EC2..."
           scp -i x10.pem -o StrictHostKeyChecking=no code.zip $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/
 
-          echo "🚀 EC2에서 docker-compose up 실행 중..."
+          echo "🚀 Running on EC2..."
           ssh -i x10.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
             mkdir -p ~/Deploy
             unzip -o ~/code.zip -d ~/Deploy
             rm ~/code.zip
             cd ~/Deploy
+            cat .env  # ✅ 디버그용 확인
             docker-compose down
             docker-compose up --build -d
           EOF
-
+          
       - name: Cleanup SSH key
         run: rm -f x10.pem
