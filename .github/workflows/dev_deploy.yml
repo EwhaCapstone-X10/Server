@@ -94,6 +94,24 @@ jobs:
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > x10.pem
           chmod 600 x10.pem
+      
+      - name: Create .env file for docker-compose
+        run: |
+          cat <<EOF > .env
+          JWT_KEY=${{ secrets.JWT_KEY }}
+          RDS_URL=${{ secrets.RDS_URL }}
+          RDS_USERNAME=${{ secrets.RDS_USERNAME }}
+          RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
+          OAUTH_REST=${{ secrets.OAUTH_REST }}
+          OAUTH_CLIENT=${{ secrets.OAUTH_CLIENT }}
+          KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
+          KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+          KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+          AI_KEY=${{ secrets.AI_KEY }}  
+          EC2_USERNAME=${{ secrets.EC2_USERNAME }}
+          EC2_HOST=${{ secrets.EC2_HOST }}
+          EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}
+          EOF
 
       - name: Deploy Dockerized App to EC2
         env:
