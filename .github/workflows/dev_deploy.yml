@@ -79,7 +79,6 @@ jobs:
           echo "✅ Found JAR: $JAR_PATH"
           cp "$JAR_PATH" springboot/app.jar
 
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -94,8 +93,8 @@ jobs:
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" > x10.pem
           chmod 600 x10.pem
-      
-      - name: Create .env file for docker-compose
+
+      - name: Create .env file
         run: |
           cat <<EOF > .env
           JWT_KEY=${{ secrets.JWT_KEY }}
@@ -107,10 +106,7 @@ jobs:
           KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
           KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
-          AI_KEY=${{ secrets.AI_KEY }}  
-          EC2_USERNAME=${{ secrets.EC2_USERNAME }}
-          EC2_HOST=${{ secrets.EC2_HOST }}
-          EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}
+          AI_KEY=${{ secrets.AI_KEY }}
           EOF
 
       - name: Deploy Dockerized App to EC2
@@ -119,7 +115,7 @@ jobs:
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
         run: |
           echo "📦 EC2에 코드 전송 중..."
-          zip -r code.zip . -x '*.git*'
+          zip -r code.zip springboot ai_model docker-compose.yml .env -x '*.git*'
           scp -i x10.pem -o StrictHostKeyChecking=no code.zip $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/
 
           echo "🚀 EC2에서 docker-compose up 실행 중..."
@@ -127,7 +123,6 @@ jobs:
             mkdir -p ~/Deploy
             unzip -o ~/code.zip -d ~/Deploy
             rm ~/code.zip
-
             cd ~/Deploy
             docker-compose down
             docker-compose up --build -d
