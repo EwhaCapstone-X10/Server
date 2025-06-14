@@ -35,7 +35,7 @@
 ### 배포 및 CI/CD
 - GitHub Actions
 - AWS EC2, RDS
-- Docker
+- Docker Compose
 
 ### Communication
 - Notion
