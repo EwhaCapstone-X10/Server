@@ -10,22 +10,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      # 2️⃣ JDK 설정
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # 3️⃣ application.properties 생성
       - name: Create application.properties
         run: |
+          mkdir -p drivemate/src/main/resources
           cat <<EOF > drivemate/src/main/resources/application.properties
           spring.application.name=drivemate
           server.address=0.0.0.0
@@ -58,7 +56,6 @@ jobs:
           jwt.secretKey=${{ secrets.JWT_KEY }}
           EOF
 
-      # 4️⃣ Gradle 빌드 (테스트 생략)
       - name: Grant execute permission for gradlew
         run: chmod +x drivemate/gradlew
 
@@ -68,15 +65,10 @@ jobs:
           arguments: build -x test
           build-root-directory: drivemate
 
-      # 5️⃣ 빌드된 JAR 확인 및 이동
-      - name: List build output
-        run: ls -l drivemate/build/libs/
-
       - name: Move JAR to springboot directory
         run: |
           mkdir -p springboot
           JAR_PATH=$(find drivemate/build/libs -name "*.jar" ! -name "*plain.jar" | head -n 1)
-          echo "✅ Found JAR: $JAR_PATH"
           cp "$JAR_PATH" springboot/app.jar
 
   deploy:
@@ -108,31 +100,42 @@ jobs:
           KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
           AI_KEY=${{ secrets.AI_KEY }}
           EOF
-          
-      - name: Show .env to confirm
+
+      - name: Show .env to confirm (debug)
         run: cat .env
 
-      - name: Deploy Dockerized App to EC2
+      - name: Zip necessary files
+        run: |
+          sudo apt-get update && sudo apt-get install -y zip
+          zip -r code.zip springboot ai_model docker-compose.yml .env -x '*.git*'
+
+      - name: Send code.zip to EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
         run: |
-          echo "📦 Zipping code..."
-          zip -r code.zip springboot ai_model docker-compose.yml .env -x '*.git*'
-
-          echo "📦 Sending to EC2..."
           scp -i x10.pem -o StrictHostKeyChecking=no code.zip $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/
 
-          echo "🚀 Running on EC2..."
+      - name: Deploy on EC2 via SSH
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+        run: |
           ssh -i x10.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
+            sudo apt-get update && sudo apt-get install -y unzip docker-compose
+
             mkdir -p ~/Deploy
             unzip -o ~/code.zip -d ~/Deploy
             rm ~/code.zip
+
             cd ~/Deploy
-            cat .env  # ✅ 디버그용 확인
+            echo "✅ .env 내용 확인:"
+            cat .env
+
             docker-compose down
+            docker system prune -af
             docker-compose up --build -d
           EOF
-          
+
       - name: Cleanup SSH key
         run: rm -f x10.pem
